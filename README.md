@@ -1,2 +1,2 @@
 # docker-ssh
-A Docker SSH
+A Docker SSH (LXD/LXC emulation)
