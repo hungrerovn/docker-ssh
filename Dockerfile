@@ -8,16 +8,21 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         openssh-server \
-        sudo \
-        supervisor \
-        cron \
-        curl \
-        rsyslog \
-        wget \
-        nano \
-        vim \
-        net-tools \
-        ca-certificates \
+    supervisor \
+    rsyslog \
+    cron \
+    htop \
+    sudo \
+    curl \
+    wget \
+    net-tools \
+    iputils-ping \
+    ca-certificates \
+    openssl \
+    git \
+    vim \
+    unzip \
+    zip \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/sshd
 
