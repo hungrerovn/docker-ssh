@@ -14,6 +14,7 @@ RUN apt-get update && \
     htop \
     sudo \
     curl \
+    tini \
     wget \
     net-tools \
     iputils-ping \
@@ -27,9 +28,9 @@ RUN apt-get update && \
     && mkdir -p /var/run/sshd
 
 COPY entrypoint.sh /usr/local/bin/init.sh
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisor.conf
 RUN chmod +x /usr/local/bin/init.sh
 
 EXPOSE 22
 
-ENTRYPOINT ["/usr/local/bin/init.sh"]
+ENTRYPOINT ["tini", "--", "/usr/local/bin/init.sh"]
