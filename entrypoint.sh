@@ -30,4 +30,4 @@ sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/ssh
 sed -i 's/^#\?KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
 
 ssh-keygen -A
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisor.conf
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
