@@ -7,23 +7,23 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        openssh-server \
-    supervisor \
-    rsyslog \
+    zip \
+    git \
+    vim \
     cron \
     htop \
     sudo \
     curl \
     tini \
     wget \
-    net-tools \
-    iputils-ping \
-    ca-certificates \
-    openssl \
-    git \
-    vim \
     unzip \
-    zip \
+    openssl \
+    rsyslog \
+    net-tools \
+    supervisor \
+    iputils-ping \
+    openssh-server \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/sshd
 
