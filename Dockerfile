@@ -24,6 +24,7 @@ RUN apt-get update && \
     iputils-ping \
     openssh-server \
     ca-certificates \
+    && curl -fsSL https://tailscale.com/install.sh | sh \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/sshd
 
