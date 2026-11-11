@@ -82,14 +82,37 @@ fi
 fi
 
 if [ "$FILE_MANAGER" = "true" ] || [ "$FILE_MANAGER" = "1" ]; then
-if [ -n "$SSH_PASSWORD" ]; then
-curl -fsS https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
-mkdir -p /var/lib/filebrowser/
-filebrowser config init --database /var/lib/filebrowser/filebrowser.db
-filebrowser users add ${SSH_USER} ${SSH_PASSWORD} --database /var/lib/filebrowser/filebrowser.db --perm.admin
+    set +e
+    rm -f /etc/supervisor/conf.d/filebrowser.conf
+    FM_PASS="${FILE_MANAGER_PASSWORD:-$SSH_PASSWORD}"
+    FM_DB=/var/lib/filebrowser/filebrowser.db
+    FM_OK=0
+
+    if [ -z "$FM_PASS" ]; then
+        echo "[warn] File Browser: FILE_MANAGER_PASSWORD or SSH_PASSWORD is required, skipping"
+    elif ! FM_OUT=$(mkdir -p /var/lib/filebrowser 2>&1); then
+        echo "[warn] File Browser: cannot create data directory: $FM_OUT"
+    elif [ ! -f "$FM_DB" ] && ! FM_OUT=$(filebrowser config init --database "$FM_DB" 2>&1); then
+        echo "[warn] File Browser: config init failed: $FM_OUT"
+    else
+        if filebrowser users find "$SSH_USER" --database "$FM_DB" >/dev/null 2>&1; then
+            FM_ACTION=update
+            FM_OUT=$(filebrowser users update "$SSH_USER" --password "$FM_PASS" --database "$FM_DB" 2>&1)
+        else
+            FM_ACTION=add
+            FM_OUT=$(filebrowser users add "$SSH_USER" "$FM_PASS" --perm.admin --database "$FM_DB" 2>&1)
+        fi
+        if [ $? -eq 0 ]; then
+            FM_OK=1
+        else
+            echo "[warn] File Browser: users $FM_ACTION failed: $FM_OUT"
+        fi
+    fi
+
+    if [ "$FM_OK" = "1" ]; then
 cat <<EOF > /etc/supervisor/conf.d/filebrowser.conf
 [program:filebrowser]
-command=filebrowser --address 0.0.0.0 --port ${FILE_MANAGER_PORT} --root /home/${SSH_USER} --database /var/lib/filebrowser/filebrowser.db
+command=filebrowser --address 0.0.0.0 --port ${FILE_MANAGER_PORT} --root /home/${SSH_USER} --database ${FM_DB}
 priority=25
 autostart=true
 autorestart=true
@@ -98,7 +121,10 @@ stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 EOF
-fi
+    else
+        echo "[warn] File Browser is disabled, SSH is not affected"
+    fi
+    set -e
 fi
 
 mkdir -p /run/sshd /var/lib/tailscale /var/run/tailscale
