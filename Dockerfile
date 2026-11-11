@@ -25,10 +25,9 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/sshd
 
-COPY entrypoint.sh /usr/local/bin/init.sh
+COPY entrypoint.sh /usr/bin/deamon
 COPY supervisord.conf /etc/supervisor/conf.d/supervisor.conf
-RUN chmod +x /usr/local/bin/init.sh
+RUN chmod +x /usr/bin/deamon
+RUN ln -s /usr/bin/tini /sbin/init
 
-EXPOSE 22
-
-ENTRYPOINT ["tini", "--", "/usr/local/bin/init.sh"]
+ENTRYPOINT ["/sbin/init", "--", "deamon"]
