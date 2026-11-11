@@ -22,12 +22,13 @@ RUN apt-get update && \
     ca-certificates \
     openssh-server \
     && curl -fsSL https://tailscale.com/install.sh | sh \
+    && curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/run/sshd
 
-COPY entrypoint.sh /usr/bin/deamon
+COPY entrypoint.sh /usr/bin/daemon
 COPY supervisord.conf /etc/supervisor/conf.d/supervisor.conf
-RUN chmod +x /usr/bin/deamon
+RUN chmod +x /usr/bin/daemon
 RUN ln -s /usr/bin/tini /sbin/init
 
-ENTRYPOINT ["/sbin/init", "--", "deamon"]
+ENTRYPOINT ["/sbin/init", "--", "daemon"]
