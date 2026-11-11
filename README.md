@@ -35,7 +35,7 @@ docker run -d --name vps \
   -e FILE_MANAGER_PASSWORD='Password@123' \
   -p 2222:22 -p 7681:7681 -p 8080:8080 \
   -v vps-home:/home/ubuntu \
-  hungrerovn/ubuntu:v0.3
+  hungrerovn/ubuntu:latest
 
 ```
 If passwords contain special characters (@, !, $...), remember to wrap them in single quotes '...'.
