@@ -103,4 +103,4 @@ fi
 
 mkdir -p /run/sshd /var/lib/tailscale /var/run/tailscale
 ssh-keygen -A
-exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+exec supervisord
