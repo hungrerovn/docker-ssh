@@ -1,34 +1,27 @@
-FROM ubuntu:22.04
+FROM alpine:3.24
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    zip \
-    git \
-    vim \
-    cron \
-    htop \
-    sudo \
+ARG KERNEL_URL="https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/20261118-6d7cfa9c6b53-0/x86_64/vmlinux-6.18.62"
+ARG ROOTFS_URL="https://huggingface.co/hrv-clan/vm-disk/resolve/main/debian-rootfs.ext4"
+ARG ROOTFS_SHA256="b2148a9e3a1c86746e0903c2733f94b3999f71618a54dc8f228ab8a29f60ac12"
+
+RUN apk add --no-cache \
+    qemu-system-x86_64 \
+    e2fsprogs \
     curl \
-    tini \
-    wget \
-    ttyd \
-    unzip \
-    openssl \
-    rsyslog \
-    net-tools \
-    supervisor \
-    iputils-ping \
     ca-certificates \
-    openssh-server \
-    && curl -fsSL https://tailscale.com/install.sh | sh \
-    && curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /var/run/sshd
+    coreutils \
+    util-linux
 
-COPY entrypoint.sh /usr/bin/daemon
-COPY supervisord.conf /etc/supervisor/conf.d/supervisor.conf
-RUN chmod +x /usr/bin/daemon
-RUN ln -s /usr/bin/tini /sbin/init
+RUN mkdir -p /opt/vm && \
+    curl -fsSL -o /opt/vm/vmlinux-6.18.62 "$KERNEL_URL" && \
+    curl -fsSL -o /opt/vm/debian-rootfs.ext4 "$ROOTFS_URL" && \
+    echo "$ROOTFS_SHA256  /opt/vm/debian-rootfs.ext4" | sha256sum -c -
 
-ENTRYPOINT ["/sbin/init", "--", "daemon"]
+ENV VM_DIR=/opt/vm \
+    KERNEL=/opt/vm/vmlinux-6.18.62 \
+    ROOTFS=/opt/vm/debian-rootfs.ext4
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
